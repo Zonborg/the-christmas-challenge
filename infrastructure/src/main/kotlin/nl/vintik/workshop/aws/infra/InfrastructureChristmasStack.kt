@@ -4,6 +4,7 @@ import software.amazon.awscdk.Duration
 import software.amazon.awscdk.RemovalPolicy
 import software.amazon.awscdk.Stack
 import software.amazon.awscdk.StackProps
+import software.amazon.awscdk.services.appsync.alpha.*
 import software.amazon.awscdk.services.dynamodb.Attribute
 import software.amazon.awscdk.services.dynamodb.AttributeType
 import software.amazon.awscdk.services.dynamodb.BillingMode
@@ -61,6 +62,33 @@ class InfrastructureChristmasStack(scope: Construct, id: String, props: StackPro
 
         reindeerTable.grantWriteData(function)
 
+        val apiName = "ReindeerApi"
+        val reindeerApi = GraphqlApi.Builder.create(this, apiName)
+            .name(apiName)
+            .schema(SchemaFile.fromAsset(this::class.java.getResource("/schemas/reindeer.graphql")!!.path))
+            .authorizationConfig(
+                AuthorizationConfig.builder()
+                    .defaultAuthorization(
+                        AuthorizationMode.builder()
+                            .authorizationType(AuthorizationType.API_KEY).build()
+                    ).build()
+            ).logConfig(
+                LogConfig
+                    .builder()
+                    .fieldLogLevel(FieldLogLevel.ERROR)
+                    .build()
+            )
+            .build()
+
+        reindeerApi.addDynamoDbDataSource("getReindeerById", reindeerTable).createResolver(
+            "resolveById",
+            BaseResolverProps.builder()
+                .typeName("Query")
+                .fieldName("getReindeerById")
+                .requestMappingTemplate(MappingTemplate.dynamoDbGetItem("id", "id"))
+                .requestMappingTemplate(MappingTemplate.dynamoDbResultItem())
+                .build()
+        )
     }
 
 

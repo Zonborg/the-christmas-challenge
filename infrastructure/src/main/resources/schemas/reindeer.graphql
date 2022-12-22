@@ -1,0 +1,15 @@
+type Reindeer{
+    id: String!
+    name: String!
+    speed: Int!
+    skill: String
+    description: String
+}
+
+type Query {
+    getReindeerById(id: String!): Reindeer
+}
+
+type Schema {
+    query: Query
+}
