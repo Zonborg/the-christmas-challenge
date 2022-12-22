@@ -1,5 +1,6 @@
 package nl.vintik.workshop.aws.infra
 
+import org.w3c.dom.Attr
 import software.amazon.awscdk.Duration
 import software.amazon.awscdk.RemovalPolicy
 import software.amazon.awscdk.Stack
@@ -51,6 +52,12 @@ class InfrastructureChristmasStack(scope: Construct, id: String, props: StackPro
                 Attribute.builder()
                     .type(AttributeType.STRING)
                     .name("id")
+                    .build()
+            )
+            .partitionKey(
+                Attribute.builder()
+                    .type(AttributeType.STRING)
+                    .name("name")
                     .build()
             )
             .removalPolicy(RemovalPolicy.DESTROY)
