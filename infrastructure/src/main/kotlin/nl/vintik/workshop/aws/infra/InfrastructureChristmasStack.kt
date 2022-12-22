@@ -1,15 +1,11 @@
 package nl.vintik.workshop.aws.infra
 
-import org.w3c.dom.Attr
 import software.amazon.awscdk.Duration
 import software.amazon.awscdk.RemovalPolicy
 import software.amazon.awscdk.Stack
 import software.amazon.awscdk.StackProps
 import software.amazon.awscdk.services.appsync.alpha.*
-import software.amazon.awscdk.services.dynamodb.Attribute
-import software.amazon.awscdk.services.dynamodb.AttributeType
-import software.amazon.awscdk.services.dynamodb.BillingMode
-import software.amazon.awscdk.services.dynamodb.Table
+import software.amazon.awscdk.services.dynamodb.*
 import software.amazon.awscdk.services.events.EventBus
 import software.amazon.awscdk.services.events.EventPattern
 import software.amazon.awscdk.services.events.Rule
@@ -54,12 +50,6 @@ class InfrastructureChristmasStack(scope: Construct, id: String, props: StackPro
                     .name("id")
                     .build()
             )
-            .partitionKey(
-                Attribute.builder()
-                    .type(AttributeType.STRING)
-                    .name("name")
-                    .build()
-            )
             .removalPolicy(RemovalPolicy.DESTROY)
             .pointInTimeRecovery(false)
             .billingMode(BillingMode.PROVISIONED)
@@ -89,6 +79,17 @@ class InfrastructureChristmasStack(scope: Construct, id: String, props: StackPro
             )
             .build()
 
+        reindeerTable.addGlobalSecondaryIndex(
+            GlobalSecondaryIndexProps.builder()
+                .indexName("reindeer-name-index")
+                .partitionKey(
+                    Attribute.builder()
+                        .name("name")
+                        .type(AttributeType.STRING)
+                        .build())
+                .projectionType(ProjectionType.ALL)
+                .build())
+
         // This is a resolver definition for our GraphQL query
         reindeerApi.addDynamoDbDataSource("getReindeerById", reindeerTable).createResolver(
             "resolveById",
@@ -105,9 +106,11 @@ class InfrastructureChristmasStack(scope: Construct, id: String, props: StackPro
             BaseResolverProps.builder()
                 .typeName("Query")
                 .fieldName("getReindeerByName")
-                .requestMappingTemplate(MappingTemplate.dynamoDbGetItem("name", "name"))
+                .requestMappingTemplate(MappingTemplate.dynamoDbQuery(KeyCondition.eq("name", "name"), "reindeer-name-index"))
                 .responseMappingTemplate(MappingTemplate.dynamoDbResultItem())
                 .build()
         )
+
+
     }
 }

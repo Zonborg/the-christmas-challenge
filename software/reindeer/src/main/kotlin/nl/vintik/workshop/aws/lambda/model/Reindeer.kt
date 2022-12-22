@@ -13,7 +13,7 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 data class Reindeer (
     @get:DynamoDbPartitionKey
     var id: String = "",
-    @get:DynamoDbSecondaryPartitionKey(indexNames = ["name"])
+    @get:DynamoDbSecondaryPartitionKey(indexNames = ["reindeer-name-index"])
     var name: String = "",
     var speed: Int = 0,
     var skill: String? = null,
