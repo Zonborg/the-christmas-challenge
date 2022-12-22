@@ -46,10 +46,12 @@ class InfrastructureChristmasStack(scope: Construct, id: String, props: StackPro
         val tableName = "Reindeer"
         val reindeerTable = Table.Builder.create(this,tableName)
             .tableName(tableName)
-            .partitionKey(Attribute.builder()
-                .type(AttributeType.STRING)
-                .name("id")
-                .build())
+            .partitionKey(
+                Attribute.builder()
+                    .type(AttributeType.STRING)
+                    .name("id")
+                    .build()
+            )
             .removalPolicy(RemovalPolicy.DESTROY)
             .pointInTimeRecovery(false)
             .billingMode(BillingMode.PROVISIONED)

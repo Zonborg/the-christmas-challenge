@@ -14,7 +14,7 @@ class KotlinLambda : RequestHandler<EventBridgeMessage<Reindeer>, String> {
     override fun handleRequest(event: EventBridgeMessage<Reindeer>, context: Context): String {
         event.detail?.let {
             reindeerTable.putItem(it).join()
-            logger.info("Put ite, $it")
+            logger.info("Put item, $it")
         }
         return "Merry Christmas!"
     }
