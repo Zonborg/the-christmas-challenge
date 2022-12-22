@@ -1,8 +1,13 @@
 package nl.vintik.workshop.aws.infra
 
 import software.amazon.awscdk.Duration
+import software.amazon.awscdk.RemovalPolicy
 import software.amazon.awscdk.Stack
 import software.amazon.awscdk.StackProps
+import software.amazon.awscdk.services.dynamodb.Attribute
+import software.amazon.awscdk.services.dynamodb.AttributeType
+import software.amazon.awscdk.services.dynamodb.BillingMode
+import software.amazon.awscdk.services.dynamodb.Table
 import software.amazon.awscdk.services.events.EventBus
 import software.amazon.awscdk.services.events.EventPattern
 import software.amazon.awscdk.services.events.Rule
@@ -37,6 +42,23 @@ class InfrastructureChristmasStack(scope: Construct, id: String, props: StackPro
                 .build())
             .targets(listOf(LambdaFunction(function)))
             .build()
+
+        val tableName = "Reindeer"
+        val reindeerTable = Table.Builder.create(this,tableName)
+            .tableName(tableName)
+            .partitionKey(Attribute.builder()
+                .type(AttributeType.STRING)
+                .name("id")
+                .build())
+            .removalPolicy(RemovalPolicy.DESTROY)
+            .pointInTimeRecovery(false)
+            .billingMode(BillingMode.PROVISIONED)
+            .readCapacity(12)
+            .writeCapacity(12)
+            .build()
+
+        reindeerTable.grantWriteData(function)
+
     }
 
 
