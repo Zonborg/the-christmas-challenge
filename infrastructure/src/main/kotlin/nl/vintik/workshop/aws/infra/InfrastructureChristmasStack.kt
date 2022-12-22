@@ -62,6 +62,7 @@ class InfrastructureChristmasStack(scope: Construct, id: String, props: StackPro
 
         reindeerTable.grantWriteData(function)
 
+        //Add GraphQL API to get Reindeers
         val apiName = "ReindeerApi"
         val reindeerApi = GraphqlApi.Builder.create(this, apiName)
             .name(apiName)
@@ -70,6 +71,7 @@ class InfrastructureChristmasStack(scope: Construct, id: String, props: StackPro
                 AuthorizationConfig.builder()
                     .defaultAuthorization(
                         AuthorizationMode.builder()
+                            //API Key is the simplest authorisation option, good enough for our workshop
                             .authorizationType(AuthorizationType.API_KEY).build()
                     ).build()
             ).logConfig(
@@ -80,16 +82,15 @@ class InfrastructureChristmasStack(scope: Construct, id: String, props: StackPro
             )
             .build()
 
+        // This is a resolver definition for our GraphQL query
         reindeerApi.addDynamoDbDataSource("getReindeerById", reindeerTable).createResolver(
             "resolveById",
             BaseResolverProps.builder()
                 .typeName("Query")
                 .fieldName("getReindeerById")
                 .requestMappingTemplate(MappingTemplate.dynamoDbGetItem("id", "id"))
-                .requestMappingTemplate(MappingTemplate.dynamoDbResultItem())
+                .responseMappingTemplate(MappingTemplate.dynamoDbResultItem())
                 .build()
         )
     }
-
-
 }
