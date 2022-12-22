@@ -92,5 +92,15 @@ class InfrastructureChristmasStack(scope: Construct, id: String, props: StackPro
                 .responseMappingTemplate(MappingTemplate.dynamoDbResultItem())
                 .build()
         )
+
+        reindeerApi.addDynamoDbDataSource("getReindeerByName", reindeerTable).createResolver(
+            "resolveByName",
+            BaseResolverProps.builder()
+                .typeName("Query")
+                .fieldName("getReindeerByName")
+                .requestMappingTemplate(MappingTemplate.dynamoDbGetItem("name", "name"))
+                .responseMappingTemplate(MappingTemplate.dynamoDbResultItem())
+                .build()
+        )
     }
 }
